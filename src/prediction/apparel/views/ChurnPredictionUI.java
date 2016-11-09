@@ -36,6 +36,7 @@ public class ChurnPredictionUI extends javax.swing.JFrame {
         message_lbl.setText("The application is predicting the churn employee list using "+bestmodel+" with accuracy of "+Accuracy);
         JOptionPane.showMessageDialog(null,"The application is predicting the churn employee list using "+bestmodel+" with accuracy of "+Accuracy,"Message",JOptionPane.OK_OPTION);
         try {
+            System.out.println("goint to call pythin code");
             Process p = Runtime.getRuntime().
                     exec("python src/prediction/apparel/pythoncode/trainBestModel.py");
             
@@ -58,12 +59,7 @@ public class ChurnPredictionUI extends javax.swing.JFrame {
             while ((s = stdError.readLine()) != null) {
                 System.out.println(s);
             }
-            
-//            try {
-//                new ModelDetailsUI().setVisible(true);
-//            } catch (SQLException ex) {
-//                Logger.getLogger(MainUI.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+
             JOptionPane.showMessageDialog(null,"Sucessfully Predicted!!","Message",JOptionPane.OK_OPTION);
                       
             dbaccess.insert(" LOAD DATA INFILE 'C:/Users/Lakini/Documents/CDAP-mypart/ApparelPrediction/src/prediction/apparel/csv/predictedchurn.csv' INTO TABLE predicted_values FIELDS TERMINATED BY ' ' (ID, Name, Churn);");

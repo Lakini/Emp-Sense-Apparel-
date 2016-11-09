@@ -1,18 +1,52 @@
 # import modules
 import pandas as pd
 import numpy as np
+import csv
+from DBAccess import DBConnection
 from sklearn.externals import joblib
 
 #read metrics file
 modelMetrics = pd.read_csv("src/prediction/apparel/csv/metricsData1.csv")
-#read data to predict using the trained model
-apperalDataToPredict = pd.read_csv("src/prediction/apparel/csv/ApperalDataSetToPredict.csv")
+print(modelMetrics)
+
+#Read data from the DB
+dbConnection = DBConnection()
+readDataSQL="SELECT `ID`,`Name`,`Career Growth`,`JoinedYear`,`Tenure`,`Age`,`Maritial Status`,`Total Salary`,`Promotions`,`Training`,`Gender`,`Working Hours`,`Experience`,`Performance Rating`,`No.of Leaves`,`Participation of Activities` FROM `emppredict` "
+print("Apparel Predict dataset")
+apperalDataPredict = dbConnection.readDataSet(readDataSQL)
+print(apperalDataPredict);
+
+c = csv.writer(open("src/prediction/apparel/csv/ApperalPredict.csv","w",newline=''))
+
+c.writerow(["ID", "Name", "Career Growth", "JoinedYear", "Tenure", "Age", "Maritial Status", "Total Salary", "Promotions","Training", "Gender" ,"Working Hours", "Experience", "Performance Rating", "No.of Leaves","Participation of Activities"])
+
+for x in apperalDataPredict:
+    c.writerow([x["ID"], 
+                x["Name"], 
+                x["Career Growth"], 
+                x["JoinedYear"],
+                x["Tenure"],
+                x["Age"],
+                x["Maritial Status"],
+                x["Total Salary"],
+                x["Promotions"],
+                x["Training"],
+                x["Gender"],
+                x["Working Hours"],
+                x["Experience"],
+                x["Performance Rating"],
+                x["No.of Leaves"],
+                x["Participation of Activities"],])
+
+apperalDataToPredict= pd.read_csv("src/prediction/apparel/csv/ApperalPredict.csv")
+#apperalData = pd.read_csv("src/prediction/apparel/csv/ApperalDataSet.csv")
 
 columns = apperalDataToPredict.columns.tolist()
+print(columns)
 # have to use only numeric values to the model
 columns = [c for c in columns if
-           c not in ["ID", "Name", "Basic Salary", "churn", "Health Status", "Recidency", "Past Job Role",
-                     "Education", "Job Role"]]
+           c not in ["ID", "Name"]]
+print(columns)
 
 #print(modelMetrics.columns)
 #print(modelMetrics)
@@ -26,6 +60,8 @@ modelDesicionTreeFile='DesicionTree.joblib.pkl'
 modelSVMFile='SVM.joblib.pkl'
 modelRandomForestClassifierFile='RandomForestClassifier.joblib.pkl'
 modelKNeighborsClassifierFile='KNeighbors.joblib.pkl'
+
+print(apperalDataToPredict[columns])
 
 #Accessing corresponding model
 if(model=="LogisticReg"):
@@ -54,9 +90,5 @@ print(IDs)
 print(predictions)
 DAT =  np.column_stack((IDs, names, predictions))
 np.savetxt('src/prediction/apparel/csv/predictedchurn.csv',DAT, delimiter=" ", fmt="%s")
-
-
-
-
 
 

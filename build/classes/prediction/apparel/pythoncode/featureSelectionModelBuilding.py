@@ -1,7 +1,8 @@
-# import modules
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import csv
+import threading
 from sklearn import preprocessing
 from sklearn.cross_validation import *
 from sklearn.ensemble import RandomForestClassifier
@@ -12,27 +13,52 @@ from sklearn.metrics import *
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-#from ApparelPrediction.src.prediction.apparel.databaseConn.DBAccess import DBConnection
-#C:\Users\Lakini\Documents\CDAP-mypart\ApparelPrediction\src\prediction\apparel\pythoncode\featureImportance.py
-#from com.dbconn.DBAccess import DBConnection
+from DBAccess import DBConnection
 
+#Read data from the DB
+dbConnection = DBConnection()
+readDataSQL="SELECT `ID`,`Name`,`Career Growth`,`JoinedYear`,`Tenure`,`Age`,`Maritial Status`,`Total Salary`,`Promotions`,`Training`,`Gender`,`Working Hours`,`Experience`,`Performance Rating`,`No.of Leaves`,`Participation of Activities`,`churn` FROM `empapparel` "
 
-#read data file
-apperalData = pd.read_csv("src/prediction/apparel/csv/ApperalDataSet.csv")
-apperalDataToPredict = pd.read_csv("src/prediction/apparel/csv/ApperalDataSetToPredict.csv")
+apperalData1 = dbConnection.readDataSet(readDataSQL)
 
+c = csv.writer(open("src/prediction/apparel/csv/ApparelTraining.csv","w",newline=''))
+
+c.writerow(["ID", "Name", "Career Growth", "JoinedYear", "Tenure", "Age", "Maritial Status", "Total Salary", "Promotions", "Training", "Gender" ,"Working Hours", "Experience", "Performance Rating", "No.of Leaves","Participation of Activities","churn"])
+
+for x in apperalData1:
+    c.writerow([x["ID"], 
+                x["Name"], 
+                x["Career Growth"], 
+                x["JoinedYear"],
+                x["Tenure"],
+                x["Age"],
+                x["Maritial Status"],
+                x["Total Salary"],
+                x["Promotions"],
+                x["Training"],
+                x["Gender"],
+                x["Working Hours"],
+                x["Experience"],
+                x["Performance Rating"],
+                x["No.of Leaves"],
+                x["Participation of Activities"],
+                x["churn"]])
+
+apperalData = pd.read_csv("src/prediction/apparel/csv/ApparelTraining.csv")
 # get the columns in the csv
 global columns
-####Basic Step###################################################################
 
 columns = apperalData.columns.tolist()
+
 # Remove Unwanted Labels to predict labels.But here we have to vectorised the data.
 # have to use only numeric values to the model
 columns = [c for c in columns if
            c not in ["ID", "Name", "Basic Salary", "churn", "Health Status", "Recidency", "Past Job Role",
                      "Education", "Job Role"]]
+
 # Set the predicted target to Churn
 target = "churn"
+
 # Generate the training set.  Set random_state to be able to replicate results.
 #distribute data for x and y matrices.
 X_train, X_test, y_train, y_test = train_test_split(apperalData[columns], apperalData[target], test_size = 0.4, random_state = 42)
@@ -42,10 +68,7 @@ std_scale = preprocessing.StandardScaler().fit(X_train)
 X_train_std = std_scale.transform(X_train)
 X_test_std = std_scale.transform(X_test)
 
-#######################################end of basic step####################################################
 # define a method for retrieving roc parameters and train the model
-#########################Trained the model anf get the output######################################
-
 #####With unscaled parameters
 #########train modelLogisticRegression
 def trainLogisticRegression():
@@ -314,13 +337,7 @@ def get_metrics(X_test):
     return scores_df
 
 metricsData=get_metrics(X_test)
-# model_names=["LogisticReg","SVMC","DecisionTree","RandomForest","kNN9"]
-
-#x=DBConnection()
-# for i in range(5):
-#     sql= "INSERT INTO `modeldetails`(`Model`, `Accuracy`, `Precision_details`, `Recall`, `F1`) VALUES (%s, %d, %d, %d, %d)" %(model_names[i],metricsData["Accuracy"][i],metricsData["Precision"][i],metricsData["Recall"][i],metricsData["F1"][i])
-#     x.insert_update(sql)
-
+print(metricsData)
 metricsData.to_csv("src/prediction/apparel/csv/metricsData1.csv");
 
 modelMetrics = pd.read_csv("src/prediction/apparel/csv/metricsData1.csv")
@@ -328,9 +345,11 @@ i=modelMetrics["Accuracy"].argmax()
 model=modelMetrics["Unnamed: 0"][i]
 modelAccuracy=modelMetrics["Accuracy"][i]
 
+print(model)
+print(modelAccuracy)
+
 x=DBConnection()
-#x=DBConnection()
-sql1="UPDATE `modeldetails` SET `Model`=%s,`Accuracy`=%d WHERE 1" %(model,modelAccuracy)
+updateAccuracySQL="UPDATE `modeldetails` SET `Model`='%s',`Accuracy`=%d WHERE 1" %(model_names[i],metricsData["Accuracy"][i])
 #sql= "INSERT INTO `modeldetails`(`Model`, `Accuracy`) VALUES (%s, %d)" %(model_names[i],metricsData["Accuracy"][i],metricsData["Precision"][i],metricsData["Recall"][i],metricsData["F1"][i])
-x.insert_update(sql)
+x.insert_update(updateAccuracySQL)
 

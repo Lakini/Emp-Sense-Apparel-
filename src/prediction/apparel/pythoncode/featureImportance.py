@@ -13,8 +13,7 @@ from sklearn.metrics import *
 from sklearn.cross_validation import *
 
 #read data file
-apperalData = pd.read_csv("src/prediction/apparel/csv/ApperalDataSet.csv")
-apperalDataToPredict = pd.read_csv("src/prediction/apparel/csv/ApperalDataSetToPredict.csv")
+apperalData = pd.read_csv("src/prediction/apparel/csv/ApperalTraining.csv")
 
 # get the columns in the csv
 global columns

@@ -25,9 +25,9 @@ public class MainUI extends javax.swing.JFrame {
         setWindowIcon();
     }
     
-     /*
-    * @Method setWindowIcon 
-    * Set Window Icon
+    /*
+     * @Method setWindowIcon 
+     * Set Window Icon
     */
     private void setWindowIcon(){
         //Set ImageIcon of window
@@ -174,9 +174,9 @@ public class MainUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btntrainModelsActionPerformed
 
     private void btndoPredictionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btndoPredictionActionPerformed
-        try { 
-            new ChurnPredictionUI().setVisible(true);
-        } catch (SQLException ex) {
+        try {
+            new PredictUI().setVisible(true);
+        } catch (IOException ex) {
             Logger.getLogger(MainUI.class.getName()).log(Level.SEVERE, null, ex);
         }
         dispose();       

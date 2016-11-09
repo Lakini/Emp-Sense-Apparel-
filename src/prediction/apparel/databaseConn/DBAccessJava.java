@@ -62,6 +62,11 @@ public final class DBAccessJava {
         return result;
  
     }
+    
+    public void closeConn() throws SQLException{
+        conn.close();
+    }
+            
 
 } 
 
